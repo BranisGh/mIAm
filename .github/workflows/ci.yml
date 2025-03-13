@@ -35,6 +35,7 @@ jobs:
 
       - name: Lint Code with Flake8
         run: |
+          source .venv/bin/activate
           flake8 ./src/
 
       # - name: Run Tests with Pytest
@@ -43,4 +44,5 @@ jobs:
 
       - name: Format Check with Black
         run: |
+          source .venv/bin/activate
           black --check ./src/
