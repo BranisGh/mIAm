@@ -35,15 +35,12 @@ jobs:
 
       - name: Lint Code with Flake8
         run: |
-          uv pip install flake8
-          flake8 .
+          flake8 ./src/
 
       # - name: Run Tests with Pytest
       #   run: |
-      #     uv pip install pytest
       #     pytest tests/
 
       - name: Format Check with Black
         run: |
-          uv pip install black
-          black --check .
+          black --check ./src/
