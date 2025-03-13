@@ -1,0 +1,18 @@
+ipykernel
+python-dotenv
+langchain
+langchain-community
+langchain-core
+langchain-openai
+langgraph
+pinecone[asyncio,grpc]
+beautifulsoup4
+tiktoken
+pypdf
+langchain-pinecone 
+ipywidgets
+psycopg-pool
+psycopg
+langgraph-checkpoint-postgres
+# langchainhub
+# pinecone-notebooks
