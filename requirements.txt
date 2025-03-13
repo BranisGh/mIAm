@@ -14,5 +14,8 @@ ipywidgets
 psycopg-pool
 psycopg
 langgraph-checkpoint-postgres
+flake8
+black
+pytest
 # langchainhub
 # pinecone-notebooks
