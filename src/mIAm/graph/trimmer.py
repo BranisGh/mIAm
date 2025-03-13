@@ -3,7 +3,7 @@ from langchain_openai import ChatOpenAI
 
 
 TRIMMER = trim_messages(
-    strategy="last", 
+    strategy="last",
     token_counter=ChatOpenAI(model="gpt-4o"),
     max_tokens=1000,
     start_on="human",
