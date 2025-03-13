@@ -1,3 +1,6 @@
+flake8
+black
+pytest
 ipykernel
 python-dotenv
 langchain
@@ -14,8 +17,5 @@ ipywidgets
 psycopg-pool
 psycopg
 langgraph-checkpoint-postgres
-flake8
-black
-pytest
 # langchainhub
 # pinecone-notebooks
