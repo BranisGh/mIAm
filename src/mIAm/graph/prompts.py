@@ -15,7 +15,6 @@ I am here to assist you with all things cooking, recipes, and culinary advice. M
 📝 **After you are able to discern all the information, call the relevant tool.**"""
 
 
-
 GENERATOR_SYSTEM_PROMPT = """✍️ **Crafting a detailed and structured response based on user input.**  
 
 🔹 **User Requirements:** {requirements}  
@@ -30,5 +29,4 @@ GENERATOR_SYSTEM_PROMPT = """✍️ **Crafting a detailed and structured respons
 
 ✨ **Boost Readability:** Use **emojis, tables, and animations** where relevant for a more engaging experience!  
 
-💡 **Processing your request… Get ready to cook something amazing!** 🍳🔥"""  
-
+💡 **Processing your request… Get ready to cook something amazing!** 🍳🔥"""

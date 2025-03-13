@@ -14,7 +14,6 @@ def get_state(state):
     return "info"
 
 
-
 workflow = StateGraph(State)
 workflow.add_node("info_chain", info_chain)
 workflow.add_node("generator", generator)
@@ -32,7 +31,9 @@ def add_tool_message(state: State):
     }
 
 
-workflow.add_conditional_edges("info_chain", get_state, ["add_tool_message", "info_chain", END])
+workflow.add_conditional_edges(
+    "info_chain", get_state, ["add_tool_message", "info_chain", END]
+)
 workflow.add_edge("add_tool_message", "generator")
 workflow.add_edge("generator", END)
 workflow.add_edge(START, "info_chain")
