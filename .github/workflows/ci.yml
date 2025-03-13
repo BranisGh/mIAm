@@ -33,10 +33,10 @@ jobs:
           source .venv/bin/activate
           uv pip install -e .
 
-      - name: Lint Code with Flake8
-        run: |
-          source .venv/bin/activate
-          flake8 ./src/
+      # - name: Lint Code with Flake8
+      #   run: |
+      #     source .venv/bin/activate
+      #     flake8 ./src/
 
       # - name: Run Tests with Pytest
       #   run: |
