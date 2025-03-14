@@ -17,5 +17,7 @@ ipywidgets
 psycopg-pool
 psycopg
 langgraph-checkpoint-postgres
+streamlit
 # langchainhub
 # pinecone-notebooks
+asyncio
