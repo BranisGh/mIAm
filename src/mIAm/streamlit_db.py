@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import asyncio
-import time
 from psycopg_pool import AsyncConnectionPool
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langchain_core.messages import HumanMessage, AIMessage
@@ -64,27 +63,19 @@ async def generate_response(prompt):
             message_placeholder = st.empty()
             full_response = ""
             
-            # Streaming de la réponse avec mode "values" pour un streaming plus granulaire
+            # Streaming de la réponse
             async for output in graph.astream(
                 {"messages": [HumanMessage(content=prompt)]}, 
                 config=config, 
-                stream_mode="values"
+                stream_mode="updates"
             ):
-                if output and "messages" in output:
-                    messages = output["messages"]
-                    if messages and len(messages) > 0:
-                        last_message = messages[-1]
-                        if isinstance(last_message, AIMessage) and last_message.content:
-                            # Récupérer uniquement le nouveau contenu depuis la dernière mise à jour
-                            new_content = last_message.content
-                            if len(new_content) > len(full_response):
-                                # Afficher progressivement le nouveau contenu
-                                full_response = new_content
-                                message_placeholder.markdown(full_response + "▌")
-                                # Petit délai pour rendre l'affichage plus naturel
-                                await asyncio.sleep(0.01)
+                if output:
+                    last_message = next(iter(output.values()))["messages"][-1]
+                    if isinstance(last_message, AIMessage):
+                        full_response = last_message.content
+                        message_placeholder.markdown(full_response + "▌")
             
-            # Affichage de la réponse finale sans le curseur
+            # Affichage de la réponse finale
             message_placeholder.markdown(full_response)
             
         # Ajouter la réponse à l'historique
