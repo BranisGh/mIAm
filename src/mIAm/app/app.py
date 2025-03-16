@@ -118,9 +118,9 @@ def register_user():
             city=st.session_state.city,
             country=st.session_state.country
         )
-        # Set a success flag and message for the next render
+        # Set a success flag to show in the login page
         st.session_state.registration_success = True
-        # Switch the view
+        # Switch the view to login
         st.session_state.current_view = "login"
         st.rerun()
     except Exception as e:
@@ -234,6 +234,12 @@ def render_api_key_setup():
 def render_login_view():
     st.markdown("## 🤖 mIAm Login")
     
+    # Show success message if registration was successful
+    if st.session_state.get("registration_success", False):
+        st.success("Registration successful! Please log in.")
+        # Reset the flag after showing the message
+        st.session_state.registration_success = False
+    
     # Create two columns for the form and navigation buttons
     col1, col2 = st.columns([2, 1])
     
@@ -256,12 +262,6 @@ def render_login_view():
 # Function to render registration view
 def render_register_view():
     st.markdown("## 🤖 mIAm Registration")
-    
-    # Show success message if registration was successful
-    if st.session_state.get("registration_success", False):
-        st.success("Registration successful! Please log in.")
-        # Reset the flag
-        st.session_state.registration_success = False
     
     with st.form("register_form", clear_on_submit=True):
         col1, col2 = st.columns(2)
@@ -292,13 +292,12 @@ def render_register_view():
         with col1:
             submit = st.form_submit_button("Register")
         with col2:
-            back_button = st.form_submit_button("Back to Login")
+            if st.form_submit_button("Back to Login"):
+                st.session_state.current_view = "login"
+                st.rerun()
     
     if submit:
         register_user()
-    
-    if back_button:
-        navigate_to("login")
 
 # Function to render thread selection view
 def render_chat_selection_view():
