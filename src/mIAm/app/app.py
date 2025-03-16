@@ -142,7 +142,9 @@ async def run_agent(user_message):
     
     # Add user message to chat history
     st.session_state.chat_history.append({"role": "user", "content": user_message})
-    
+    # Display the user message immediately
+    with st.chat_message("user"):
+        st.markdown(user_message)
     # Placeholder for AI response
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
@@ -252,10 +254,7 @@ def render_register_view():
             
             min_date = datetime.date(1900, 1, 1)
             default_date = datetime.date(2000, 1, 1)
-            st.date_input("Birth Date", 
-                          value=default_date,
-                          min_value=min_date,
-                          key="birth_date")
+            st.date_input("Birth Date", key="birth_date")
             st.text_input("City", key="city")
         
         col1, col2 = st.columns([1, 1])
