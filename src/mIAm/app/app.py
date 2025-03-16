@@ -72,24 +72,37 @@ def navigate_to(view):
     st.session_state.current_view = view
 
 
+# Modified login function with updated rerun method
 def login_user():
-    try:
-        db_manager = get_db_manager()
-        user = db_manager.authenticate_user(
-            email=st.session_state.email,
-            password=st.session_state.password
-        )
+    # Set a flag in session state to track submission
+    if "login_submitted" not in st.session_state:
+        st.session_state.login_submitted = True
         
-        if user:
-            st.session_state.authenticated = True
-            st.session_state.user_id = user["id"]
-            st.session_state.user_profile = db_manager.get_user_profile(user_id=user["id"])
-            st.session_state.chat_history = []  # Reset chat history on login
-            st.session_state.current_view = "chat_selection"
-        else:
-            st.error("Invalid credentials")
-    except Exception as e:
-        st.error(f"Login error: {str(e)}")
+        try:
+            db_manager = get_db_manager()
+            user = db_manager.authenticate_user(
+                email=st.session_state.email,
+                password=st.session_state.password
+            )
+            
+            if user:
+                st.session_state.authenticated = True
+                st.session_state.user_id = user["id"]
+                st.session_state.user_profile = db_manager.get_user_profile(user_id=user["id"])
+                st.session_state.chat_history = []  # Reset chat history on login
+                st.session_state.current_view = "chat_selection"
+                # Clear the submission flag for future logins
+                st.session_state.login_submitted = False
+                # Force a rerun to update the UI using the current method
+                st.rerun()
+            else:
+                st.error("Invalid credentials")
+                # Clear the submission flag on error
+                st.session_state.login_submitted = False
+        except Exception as e:
+            st.error(f"Login error: {str(e)}")
+            # Clear the submission flag on error
+            st.session_state.login_submitted = False
 
 def register_user():
     try:
@@ -105,8 +118,11 @@ def register_user():
             city=st.session_state.city,
             country=st.session_state.country
         )
-        st.success("Registration successful! Please log in.")
+        # Set a success flag and message for the next render
+        st.session_state.registration_success = True
+        # Switch the view
         st.session_state.current_view = "login"
+        st.rerun()
     except Exception as e:
         st.error(f"Registration error: {str(e)}")
 
@@ -218,27 +234,36 @@ def render_api_key_setup():
 def render_login_view():
     st.markdown("## 🤖 mIAm Login")
     
-    with st.form("login_form"):
-        st.text_input("Email", key="email")
-        st.text_input("Password", type="password", key="password")
-        
-        col1, col2 = st.columns([1, 1])
-        with col1:
+    # Create two columns for the form and navigation buttons
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        with st.form("login_form"):
+            st.text_input("Email", key="email")
+            st.text_input("Password", type="password", key="password")
             submit = st.form_submit_button("Login")
-        with col2:
-            register_button = st.form_submit_button("Register Instead")
+    
+    with col2:
+        # Regular button outside the form for navigation
+        st.write("Don't have an account?")
+        if st.button("Register Instead"):
+            st.session_state.current_view = "register"
+            st.rerun()
     
     if submit:
         login_user()
-    
-    if register_button:
-        navigate_to("register")
 
 # Function to render registration view
 def render_register_view():
     st.markdown("## 🤖 mIAm Registration")
     
-    with st.form("register_form"):
+    # Show success message if registration was successful
+    if st.session_state.get("registration_success", False):
+        st.success("Registration successful! Please log in.")
+        # Reset the flag
+        st.session_state.registration_success = False
+    
+    with st.form("register_form", clear_on_submit=True):
         col1, col2 = st.columns(2)
         
         with col1:
@@ -252,9 +277,15 @@ def render_register_view():
             st.text_input("Last Name", key="last_name")
             st.text_input("Password", type="password", key="reg_password")
             
+            # Date input with min_value set to January 1, 1900
+            import datetime
             min_date = datetime.date(1900, 1, 1)
             default_date = datetime.date(2000, 1, 1)
-            st.date_input("Birth Date", key="birth_date")
+            st.date_input("Birth Date", 
+                         value=default_date,
+                         min_value=min_date,
+                         key="birth_date")
+            
             st.text_input("City", key="city")
         
         col1, col2 = st.columns([1, 1])
