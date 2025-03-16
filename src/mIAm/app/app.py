@@ -8,6 +8,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
 from mIAm.app.utils import load_chat_history
 import openai
+import datetime
 
 # Load environment variables from .env file if it exists
 load_dotenv()
@@ -248,7 +249,13 @@ def render_register_view():
         with col2:
             st.text_input("Last Name", key="last_name")
             st.text_input("Password", type="password", key="reg_password")
-            st.date_input("Birth Date", key="birth_date")
+            
+            min_date = datetime.date(1900, 1, 1)
+            default_date = datetime.date(2000, 1, 1)
+            st.date_input("Birth Date", 
+                          value=default_date,
+                          min_value=min_date,
+                          key="birth_date")
             st.text_input("City", key="city")
         
         col1, col2 = st.columns([1, 1])
