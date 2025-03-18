@@ -2,6 +2,7 @@ import streamlit as st
 import asyncio
 from uuid import uuid4
 import os
+import psycopg2
 from psycopg_pool import AsyncConnectionPool
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langchain_core.messages import HumanMessage, AIMessage
