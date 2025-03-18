@@ -20,5 +20,6 @@ langgraph-checkpoint-postgres
 psycopg2
 bcrypt
 streamlit
+colorama
 # langchainhub
 # pinecone-notebooks
