@@ -7,7 +7,7 @@ from mIAm.graph.trimmer import TRIMMER
 from mIAm.graph.prompts import INFO_CHAIN_SYSTEM_PROMPT, GENERATOR_SYSTEM_PROMPT
 
 
-def info_chain(state: State) -> State:
+async def info_chain(state: State) -> State:
     """
     Handles recipe-related queries using structured response formatting.
 
@@ -32,14 +32,14 @@ def info_chain(state: State) -> State:
         special_instructions: List[str]
         formatted_query: str
 
-    trimmed_messages = TRIMMER.invoke(state["messages"])
+    trimmed_messages = await TRIMMER.ainvoke(state["messages"])
     messages = [SystemMessage(content=INFO_CHAIN_SYSTEM_PROMPT)] + trimmed_messages
     llm_with_tool = LLM.bind_tools([RecipeInstructions])
-    response = llm_with_tool.invoke(messages)
+    response = await llm_with_tool.ainvoke(messages)
     return {"messages": [response]}
 
 
-def generator(state: State) -> State:
+async def generator(state: State) -> State:
     """
     Generates a response using LLM by extracting relevant tool calls.
 
@@ -49,7 +49,7 @@ def generator(state: State) -> State:
     Returns:
         dict: Updated state with generated response.
     """
-    trimmed_messages = TRIMMER.invoke(state["messages"])
+    trimmed_messages = await TRIMMER.ainvoke(state["messages"])
     tool_call: Optional[Dict[str, Any]] = None
     other_msgs = []
 
@@ -66,5 +66,5 @@ def generator(state: State) -> State:
         requirements=tool_call, formatted_query=formatted_query
     )
 
-    response = LLM.invoke([SystemMessage(content=system_prompt)] + other_msgs)
+    response = await LLM.ainvoke([SystemMessage(content=system_prompt)] + other_msgs)
     return {"messages": [response]}
