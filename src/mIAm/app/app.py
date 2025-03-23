@@ -201,7 +201,7 @@ def register_user() -> None:
         user_id = db_manager.register_user(
             first_name=st.session_state.first_name,
             last_name=st.session_state.last_name,
-            email=st.session_state.reg_email,
+            email=normalized_email.lower(),
             password=st.session_state.reg_password,
             phone=st.session_state.get("phone", ""),
             birth_date=st.session_state.get("birth_date", date.today()),
