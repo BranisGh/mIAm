@@ -19,5 +19,4 @@ psycopg
 langgraph-checkpoint-postgres
 psycopg2
 bcrypt
-# langchainhub
-# pinecone-notebooks
+colorama
