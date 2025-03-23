@@ -20,3 +20,4 @@ langgraph-checkpoint-postgres
 psycopg2
 bcrypt
 colorama
+email-validator

@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import time
 from mIAm import setup_logger
 from pathlib import Path
+from email_validator import validate_email, EmailNotValidError
 
 # Define the ROOT directory
 ROOT = Path(__file__).resolve().parents[3]
@@ -180,8 +181,14 @@ def register_user() -> None:
         
         # Basic email validation
         email = st.session_state.get("reg_email", "").strip()
-        if "@" not in email or "." not in email:
-            st.error("Please enter a valid email address.")
+        try:
+            # Validate and normalize the email address
+            valid_email = validate_email(email)
+            # Update with the normalized form
+            normalized_email = valid_email.normalized
+        except EmailNotValidError as e:
+            # Affiche l'erreur directement dans l'interface Streamlit
+            st.error(f"Invalid Email: {str(e)}")
             return
             
         # Password strength check
