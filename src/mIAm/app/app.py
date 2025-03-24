@@ -59,19 +59,15 @@ RESPONSE_STREAM_DELAY = 0.02  # seconds between words in the response stream
 
 # ===== Database Configuration =====
 def get_db_uri() -> str:
-    """Generate PostgreSQL connection URI from environment variables."""
-    required_envs = ["PSQL_USERNAME", "PSQL_PASSWORD", "PSQL_HOST", "PSQL_PORT", "PSQL_DATABASE", "PSQL_SSLMODE"]
-    missing_envs = [env for env in required_envs if not os.getenv(env)]
-    
-    if missing_envs:
-        logger.error(f"Missing environment variables: {', '.join(missing_envs)}")
-        raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_envs)}")
-    
-    return (
-        f"postgresql://{os.getenv('PSQL_USERNAME')}:{os.getenv('PSQL_PASSWORD')}"
-        f"@{os.getenv('PSQL_HOST')}:{os.getenv('PSQL_PORT')}/{os.getenv('PSQL_DATABASE')}"
-        f"?sslmode={os.getenv('PSQL_SSLMODE')}"
-    )
+    """Generate Supabase connection URI from environment variables."""
+    try:
+        return (
+            f"postgresql://postgres:{os.getenv('SUPABASE_DB_PASSWORD')}@db.fagpasxtuxuwhbkkeowy.supabase.co:5432/postgres"
+        )
+    except Exception as e:
+        logger.error(f"Failed to get database URI: {e}")
+        st.error(f"Database connection error: {str(e)}")
+        raise EnvironmentError("Database connection error")
 
 @st.cache_resource
 def get_db_manager() -> PostgresDBManager:
