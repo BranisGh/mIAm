@@ -15,6 +15,7 @@ pypdf
 langchain-pinecone 
 ipywidgets
 psycopg-pool
+psycopg
 langgraph-checkpoint-postgres
 psycopg2-binary
 bcrypt
