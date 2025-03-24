@@ -22,4 +22,3 @@ bcrypt
 colorama
 email-validator
 supabase
--e .
