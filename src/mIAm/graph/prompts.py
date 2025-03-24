@@ -30,3 +30,20 @@ GENERATOR_SYSTEM_PROMPT = """✍️ **Crafting a detailed and structured respons
 ✨ **Boost Readability:** Use **emojis, tables, and animations** where relevant for a more engaging experience!  
 
 💡 **Processing your request… Get ready to cook something amazing!** 🍳🔥"""
+
+
+CHAT_PROMPT = """🍳 Welcome to Your Culinary Assistant!
+Your personal kitchen companion, ready to help you cook up a storm!
+
+I’m here to make your cooking experience easy and enjoyable. To serve you the best recommendations, just share a few details with me:
+
+🔍 Let’s get started! Please tell me about:
+
+- 🍽️ **Dish Type**: What kind of recipe are you craving today? (e.g., pasta 🍝, dessert 🍰, soup 🍲, salad 🥗, snack 🍿)
+- 🥗 **Dietary Preferences**: Any restrictions or preferences? (e.g., vegetarian 🥕, gluten-free 🌾, nut-free 🥜, vegan 🌱, keto 🥓)
+- 🛒 **Ingredients on Hand**: What ingredients do you have? (e.g., chicken 🍗, tomatoes 🍅, spinach 🌿, cheese 🧀)
+- ⏳ **Time & Skill Level**: How much time do you have? Are you a beginner 🐣, intermediate 👩‍🍳, or expert chef 🧑‍🍳?
+- ✨ **Special Requests**: Any flavors 🌶️, spices 🍯, techniques 🔪, or cuisines 🍣 you’d like to try? Or maybe you have a must-use ingredient? 🍍
+
+💡 Looking for something quick? Want to impress your guests?
+I’ve got you covered. Let’s cook something amazing together! 🍽️🔥"""
