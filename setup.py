@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 # Read the contents of the requirements.md file for installation
 with open("requirements.txt", "r") as f:
-    requirements = [line.strip() for line in f]
+    requirements = [line.strip() for line in f if line.strip() != "-e ."]
 
 # Define package metadata
 VERSION = "0.0.0"  # Package version
