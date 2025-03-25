@@ -4,12 +4,12 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langchain_core.messages import HumanMessage, AIMessage
 import asyncio
 import streamlit as st
-
+from dotenv import load_dotenv
+load_dotenv()
 
 async def load_chat_history(thread_id):
-    DB_URI = f"postgresql://{os.getenv('PSQL_USERNAME')}:{os.getenv('PSQL_PASSWORD')}" \
-             f"@{os.getenv('PSQL_HOST')}:{os.getenv('PSQL_PORT')}/{os.getenv('PSQL_DATABASE')}" \
-             f"?sslmode={os.getenv('PSQL_SSLMODE')}"
+    DB_URI = f"postgresql://postgres.fagpasxtuxuwhbkkeowy:{os.getenv('SUPABASE_DB_PASSWORD')}" \
+             f"@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
     
     connection_kwargs = {
         "autocommit": True,
@@ -31,7 +31,7 @@ async def load_chat_history(thread_id):
             if checkpoint and "channel_values" in checkpoint and "messages" in checkpoint["channel_values"]:
                 messages = checkpoint["channel_values"]["messages"]
                 
-                # Conversion des messages LangChain en format compatible avec notre interface
+                # Converting LangChain messages to a format compatible with our interface
                 chat_history = []
                 for msg in messages:
                     if hasattr(msg, "content") and msg.content:
@@ -47,11 +47,11 @@ async def load_chat_history(thread_id):
         st.error(f"Error loading chat history: {str(e)}")
         return []
 
-# Modifiez la fonction select_thread pour charger l'historique des messages
+# Modifie the select_thread function to load the chat history
 def select_thread(thread_id):
     st.session_state.thread_id = thread_id
     
-    # Charger l'historique des messages de façon asynchrone
+    # Loading chat history
     st.session_state.chat_history = asyncio.run(load_chat_history(thread_id))
     
     st.session_state.current_view = "chat"
