@@ -16,6 +16,7 @@ langchain-pinecone
 ipywidgets
 psycopg-pool
 psycopg[binary,pool]
+asyncpg
 langgraph-checkpoint-postgres
 psycopg2-binary
 bcrypt
