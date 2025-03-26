@@ -62,7 +62,8 @@ def get_db_uri() -> str:
     """Generate Supabase connection URI from environment variables."""
     try:
         return (
-            f"postgresql://postgres.fagpasxtuxuwhbkkeowy:{os.getenv('SUPABASE_DB_PASSWORD')}@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+            f"postgresql://postgres.fagpasxtuxuwhbkkeowy:{os.getenv('SUPABASE_DB_PASSWORD')}@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+            # f"postgresql://postgres.fagpasxtuxuwhbkkeowy:{os.getenv('SUPABASE_DB_PASSWORD')}@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
         )
     except Exception as e:
         logger.error(f"Failed to get database URI: {e}")

@@ -9,28 +9,36 @@ from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
 from mIAm import setup_logger
 import logging
+import warnings
 
 logger = setup_logger(console_logging_enabled=True, log_level=logging.INFO)
-
 load_dotenv()
 
-
 async def load_chat_history(thread_id):
-    DB_URI = f"postgresql://postgres.fagpasxtuxuwhbkkeowy:{os.getenv('SUPABASE_DB_PASSWORD')}" \
-             f"@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+    """
+    Load chat history with improved async pool handling.
+    """
+    # Suppress the specific deprecation warning
+    warnings.filterwarnings("ignore", category=RuntimeWarning, 
+                             message="opening the async pool AsyncConnectionPool in the constructor is deprecated")
+    
+    # Construct connection URI
+    # DB_URI = f"postgresql://postgres.fagpasxtuxuwhbkkeowy:{os.getenv('SUPABASE_DB_PASSWORD')}" \
+    #          f"@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+    DB_URI = f"postgresql://postgres.fagpasxtuxuwhbkkeowy:{os.getenv('SUPABASE_DB_PASSWORD')}@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
     
     connection_kwargs = {
         "autocommit": True,
-        "prepare_threshold": None,
+        "prepare_threshold": None,  # Disable automatic prepared statements
     }
-    
+
     # Use async context manager for the connection pool
-    async with AsyncConnectionPool(
-        conninfo=DB_URI, 
-        max_size=20, 
-        kwargs=connection_kwargs
-    ) as pool:
-        try:
+    try:
+        async with AsyncConnectionPool(
+            conninfo=DB_URI,
+            max_size=20,
+            kwargs=connection_kwargs
+        ) as pool:
             # Use a connection from the pool
             async with pool.connection() as conn:
                 checkpointer = AsyncPostgresSaver(conn)
@@ -54,21 +62,22 @@ async def load_chat_history(thread_id):
                     return chat_history
                 
                 return []
-        
-        except psycopg.errors.DuplicatePreparedStatement:
-            # Log the specific error, but continue
-            logger.warning("Duplicate prepared statement detected. This is usually harmless.")
-            return []
-        except Exception as e:
-            logger.error(f"Error loading chat history: {str(e)}")
-            st.error(f"Error loading chat history: {str(e)}")
-            return []
 
-        
-def select_thread(thread_id):
-    st.session_state.thread_id = thread_id
+    except psycopg.errors.DuplicatePreparedStatement as dps:
+        # Log the specific error with more context
+        logger.warning(f"Duplicate prepared statement detected: {str(dps)}")
+        return []
+    
+    except Exception as e:
+        logger.error(f"Error loading chat history: {str(e)}")
+        st.error(f"Error loading chat history: {str(e)}")
+        return []
 
-    # Loading chat history
-    st.session_state.chat_history = asyncio.run(load_chat_history(thread_id))
-
-    st.session_state.current_view = "chat"
+async def load_thread_history(thread_id: str) -> List[Dict[str, str]]:
+    """Load chat history for a thread."""
+    try:
+        return await load_chat_history(thread_id)
+    except Exception as e:
+        logger.error(f"Error loading chat history: {str(e)}")
+        st.error("Failed to load chat history. Please try refreshing the page.")
+        return []
