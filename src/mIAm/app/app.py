@@ -273,6 +273,7 @@ async def load_thread_history(thread_id: str) -> List[Dict[str, str]]:
         st.error("Failed to load chat history. Please try refreshing the page.")
         return []
 
+
 def stream_message(message: str) -> str:
     """Generator for streaming words in a message."""
     for word in message.split(" "):

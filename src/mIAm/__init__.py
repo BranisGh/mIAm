@@ -49,7 +49,7 @@ def setup_logger(console_logging_enabled=False, log_level=logging.INFO):
     log_filepath = os.path.join(log_dir, log_filename)
     
     # Create logger
-    logger = logging.getLogger("full_aidvs_pipeline_logger")
+    logger = logging.getLogger("miam_logger")
     logger.setLevel(log_level)
     logger.handlers.clear()
     
