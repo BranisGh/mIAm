@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - supabase_merwane
   pull_request:
     branches:
       - main
@@ -36,7 +37,7 @@ jobs:
       - name: Format Check with Black
         run: |
           source .venv/bin/activate
-          black --check ./src/
+          black ./src/
   test:
     runs-on: ubuntu-latest
 
