@@ -61,6 +61,8 @@ jobs:
           uv pip install -e .
 
       - name: Run Tests with Pytest
+        env:
+          OPENAI_API_KEY: "dummy-key-for-testing"
         run: |
           source .venv/bin/activate
           pytest tests/
