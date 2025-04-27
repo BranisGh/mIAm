@@ -1,0 +1,148 @@
+name: Miam CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - supabase_postgres_db
+      - supabase_merwane
+  pull_request:
+    branches:
+      - main
+      - develop
+      - supabase_postgres_db
+      - supabase_merwane
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+  GKE_CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
+  GKE_ZONE: ${{ secrets.GKE_ZONE }}
+  IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+  REGISTRY: ${{ secrets.REGISTRY }}
+  REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+  REPOSITORY_LOCATION: ${{ secrets.REPOSITORY_LOCATION }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  SUPABASE_PROJECT_NAME: ${{ secrets.SUPABASE_PROJECT_NAME }}
+  SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install UV Package Manager
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      
+      - name: Set Up Virtual Environment and Dependencies
+        run: |
+          uv venv .venv
+          source .venv/bin/activate
+          uv pip install -e .
+      
+      - name: Format Check with Black
+        run: |
+          source .venv/bin/activate
+          black --check ./src/
+  
+  test:
+    name: Run Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    # Only run tests on push to main branches or manual triggers
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install UV Package Manager
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      
+      - name: Set Up Virtual Environment and Dependencies
+        run: |
+          uv venv .venv
+          source .venv/bin/activate
+          uv pip install -e .
+      
+      - name: Run Tests with Pytest
+        run: |
+          source .venv/bin/activate
+          pytest tests/ --junitxml=test-results.xml
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results.xml
+  
+  build_and_push:
+    name: Build and Push Docker Image
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    # Only build and push on push to specified branches or manual triggers
+    if: ${{ (github.event_name == 'push' && contains(fromJson('["main", "develop", "supabase_postgres_db", "supabase_merwane"]'), github.ref_name)) || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Google Auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - name: Configure Docker for GCP Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REPOSITORY_LOCATION }}-docker.pkg.dev --quiet
+      
+      - name: Generate Build ID
+        id: build-id
+        run: echo "id=$(date +'%Y%m%d%H%M%S')-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+      - name: Set Full Image Names
+        run: |
+          echo "FULL_IMAGE_PATH=${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
+          echo "FULL_IMAGE_PATH=${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}"
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v2
+      
+      # - name: Build and Push Docker Image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: |
+      #       ${{ env.FULL_IMAGE_PATH }}:${{ steps.build-id.outputs.id }}
+      #       ${{ env.FULL_IMAGE_PATH }}:latest
+      #     cache-from: type=gha
+      #     cache-to: type=gha,mode=max
+
+      # - name: Push Docker image
+      #   run: |
+      #     docker push $REGISTRY/$REPOSITORY/$IMAGE:${{ steps.build-id.outputs.id }}
+      #     docker push $REGISTRY/$REPOSITORY/$IMAGE:latest
