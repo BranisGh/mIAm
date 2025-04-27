@@ -187,27 +187,27 @@ jobs:
       - name: Generate Kubernetes manifests
         run: |
           mkdir -p k8s/generated
-          envsubst < k8s/templates/configmap.yaml.template > k8s/generated/configmap.yaml
-          envsubst < k8s/templates/secret.yaml.template > k8s/generated/secret.yaml
+          envsubst < k8s/templates/miam-configmap.yaml.template > k8s/generated/miam-configmap.yaml
+          envsubst < k8s/templates/miam-secret.yaml.template > k8s/generated/miam-secret.yaml
           
           # copy other base files
-          cp k8s/base/namespace.yaml k8s/generated/namespace.yaml
-          cp k8s/base/service.yaml k8s/generated/service.yaml
-          cp k8s/base/ingress.yaml k8s/generated/ingress.yaml
+          cp k8s/base/miam-namespace.yaml k8s/generated/miam-namespace.yaml
+          cp k8s/base/miam-service.yaml k8s/generated/miam-service.yaml
+          cp k8s/base/miam-ingress.yaml k8s/generated/miam-ingress.yaml
           
           # Replace the image in the deployment with the generated build image
-          cat k8s/base/deployment.yaml | \
+          cat k8s/base/miam-deployment.yaml | \
           sed "s|region-docker.pkg.dev/project-id/repository/image:tag|${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ needs.build_and_push.outputs.build_id }}|g" > \
-          k8s/generated/deployment.yaml
+          k8s/generated/miam-deployment.yaml
 
       - name: Deploy Kubernetes manifests
         run: |
-          kubectl apply -f k8s/generated/namespace.yaml
-          kubectl apply -f k8s/generated/configmap.yaml
-          kubectl apply -f k8s/generated/secret.yaml
-          kubectl apply -f k8s/generated/deployment.yaml
-          kubectl apply -f k8s/generated/service.yaml
-          kubectl apply -f k8s/generated/ingress.yaml
+          kubectl apply -f k8s/generated/miam-namespace.yaml
+          kubectl apply -f k8s/generated/miam-configmap.yaml
+          kubectl apply -f k8s/generated/miam-secret.yaml
+          kubectl apply -f k8s/generated/miam-deployment.yaml
+          kubectl apply -f k8s/generated/miam-service.yaml
+          kubectl apply -f k8s/generated/miam-ingress.yaml
 
       - name: Wait for Deployment
         run: |
