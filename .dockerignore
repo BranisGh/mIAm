@@ -1,12 +1,14 @@
 .env
 *logs
-*images
 .venv
 .gitignore
 .github
 .git
 .env.example
 .devcontainer
-miam-454610-a9994ca75033.json
 export_vars.sh
 kubectl*
+k8s_local
+decrypt_secret.sh
+gcp_service_account_key.json.gpg
+setup.sh
