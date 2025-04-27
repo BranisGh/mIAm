@@ -144,7 +144,6 @@ jobs:
           push: true
           tags: |
             ${{ env.FULL_IMAGE_PATH }}:${{ steps.build-id.outputs.id }}
-            # ${{ env.FULL_IMAGE_PATH }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
