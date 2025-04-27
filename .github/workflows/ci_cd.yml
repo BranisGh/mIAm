@@ -173,6 +173,14 @@ jobs:
       - name: Configure kubectl
         run: |
           gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --zone ${{ env.GKE_ZONE }} --project ${{ env.GCP_PROJECT_ID }}
+      
+      - name: Install kubectl
+        run: |
+          gcloud components install kubectl
+
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
 
       - name: Set ENV variables
         run: |
@@ -200,16 +208,6 @@ jobs:
           sed "s|region-docker.pkg.dev/project-id/repository/image:tag|${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ needs.build_and_push.outputs.build_id }}|g" > \
           k8s/generated/miam-deployment.yaml
       
-      - name: Install gke-gcloud-auth-plugin
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
-      
-      - name: Configure gke-gcloud-auth-plugin
-        run: |
-          gcloud components install gke-gcloud-auth-plugin
-          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-
       - name: Deploy Kubernetes manifests
         run: |
           kubectl apply -f k8s/generated/miam-namespace.yaml
