@@ -177,13 +177,13 @@ jobs:
       - name: Set ENV variables
         run: |
           echo "SUPABASE_PROJECT_NAME=${{ secrets.SUPABASE_PROJECT_NAME }}" >> $GITHUB_ENV
-          echo "SUPABASE_URL_B64=$(echo -n '${{ secrets.SUPABASE_URL }}' | base64)" >> $GITHUB_ENV
-          echo "SUPABASE_KEY_B64=$(echo -n '${{ secrets.SUPABASE_KEY }}' | base64)" >> $GITHUB_ENV
-          echo "SUPABASE_DB_PASSWORD_B64=$(echo -n '${{ secrets.SUPABASE_DB_PASSWORD }}' | base64)" >> $GITHUB_ENV
-          echo "OPENAI_API_KEY_B64=$(echo -n '${{ secrets.OPENAI_API_KEY }}' | base64)" >> $GITHUB_ENV
+          echo "SUPABASE_URL_B64=$(echo -n '${{ secrets.SUPABASE_URL }}' | base64 -w0)" >> $GITHUB_ENV
+          echo "SUPABASE_KEY_B64=$(echo -n '${{ secrets.SUPABASE_KEY }}' | base64 -w0)" >> $GITHUB_ENV
+          echo "SUPABASE_DB_PASSWORD_B64=$(echo -n '${{ secrets.SUPABASE_DB_PASSWORD }}' | base64 -w0)" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY_B64=$(echo -n '${{ secrets.OPENAI_API_KEY }}' | base64 -w0)" >> $GITHUB_ENV
           # Retrieve the image from the previous job (build_and_push)
           echo "FULL_IMAGE_PATH=${{ needs.build_and_push.outputs.build_id }}" >> $GITHUB_ENV
-
+            
       - name: Generate Kubernetes manifests
         run: |
           mkdir -p k8s/generated
