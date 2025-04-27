@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: miam-configmap
+  namespace: miam
+  labels:
+    app: miam
+data:
+  SUPABASE_PROJECT_NAME: "${SUPABASE_PROJECT_NAME}"

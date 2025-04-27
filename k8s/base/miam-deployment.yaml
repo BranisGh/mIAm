@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: miam-deployment
+  namespace: miam
+  labels:
+    app: miam
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: miam
+  template:
+    metadata:
+      labels:
+        app: miam
+    spec:
+      containers:
+      - name: miam
+        image: region-docker.pkg.dev/project-id/repository/image:tag
+        env:
+        - name: SUPABASE_PROJECT_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: miam-configmap
+              key: SUPABASE_PROJECT_NAME
+        - name: SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: miam-secret
+              key: SUPABASE_URL
+        - name: SUPABASE_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: miam-secret
+              key: SUPABASE_DB_PASSWORD
+        - name: SUPABASE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: miam-secret
+              key: SUPABASE_KEY
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: miam-secret
+              key: OPENAI_API_KEY
+        ports:
+        - containerPort: 8501
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          initialDelaySeconds: 5
+          periodSeconds: 5

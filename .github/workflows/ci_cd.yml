@@ -106,6 +106,9 @@ jobs:
     name: Build and Push Docker Image
     needs: [lint, test]
     runs-on: ubuntu-latest
+    outputs:  
+      build_id: ${{ steps.build-id.outputs.id }}
+      full_image_path: ${{ env.FULL_IMAGE_PATH }}
     # Only build and push on push to specified branches or manual triggers
     if: ${{ (github.event_name == 'push' && contains(fromJson('["main", "develop", "supabase_postgres_db", "supabase_merwane"]'), github.ref_name)) || github.event_name == 'workflow_dispatch' }}
     steps:
@@ -147,7 +150,65 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # - name: Push Docker image
-      #   run: |
-      #     docker push $REGISTRY/$REPOSITORY/$IMAGE:${{ steps.build-id.outputs.id }}
-      #     # docker push $REGISTRY/$REPOSITORY/$IMAGE:latest
+  deploy:
+    name: Deploy to GKE
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'push' && contains(fromJson('["main", "develop", "supabase_postgres_db", "supabase_merwane"]'), github.ref_name)) || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - name: Configure kubectl
+        run: |
+          gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --zone ${{ env.GKE_ZONE }} --project ${{ env.GCP_PROJECT_ID }}
+
+      - name: Set ENV variables
+        run: |
+          echo "SUPABASE_PROJECT_NAME=${{ secrets.SUPABASE_PROJECT_NAME }}" >> $GITHUB_ENV
+          echo "SUPABASE_URL_B64=$(echo -n '${{ secrets.SUPABASE_URL }}' | base64)" >> $GITHUB_ENV
+          echo "SUPABASE_KEY_B64=$(echo -n '${{ secrets.SUPABASE_KEY }}' | base64)" >> $GITHUB_ENV
+          echo "SUPABASE_DB_PASSWORD_B64=$(echo -n '${{ secrets.SUPABASE_DB_PASSWORD }}' | base64)" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY_B64=$(echo -n '${{ secrets.OPENAI_API_KEY }}' | base64)" >> $GITHUB_ENV
+          # Retrieve the image from the previous job (build_and_push)
+          echo "FULL_IMAGE_PATH=${{ needs.build_and_push.outputs.build_id }}" >> $GITHUB_ENV
+
+      - name: Generate Kubernetes manifests
+        run: |
+          mkdir -p k8s/generated
+          envsubst < k8s/templates/configmap.yaml.template > k8s/generated/configmap.yaml
+          envsubst < k8s/templates/secret.yaml.template > k8s/generated/secret.yaml
+          
+          # copy other base files
+          cp k8s/base/namespace.yaml k8s/generated/namespace.yaml
+          cp k8s/base/service.yaml k8s/generated/service.yaml
+          cp k8s/base/ingress.yaml k8s/generated/ingress.yaml
+          
+          # Replace the image in the deployment with the generated build image
+          cat k8s/base/deployment.yaml | \
+          sed "s|region-docker.pkg.dev/project-id/repository/image:tag|${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ needs.build_and_push.outputs.build_id }}|g" > \
+          k8s/generated/deployment.yaml
+
+      - name: Deploy Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/generated/namespace.yaml
+          kubectl apply -f k8s/generated/configmap.yaml
+          kubectl apply -f k8s/generated/secret.yaml
+          kubectl apply -f k8s/generated/deployment.yaml
+          kubectl apply -f k8s/generated/service.yaml
+          kubectl apply -f k8s/generated/ingress.yaml
+
+      - name: Wait for Deployment
+        run: |
+          kubectl rollout status deployment/miam-deployment --timeout=5m
