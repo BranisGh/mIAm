@@ -1,0 +1,12 @@
+.env
+*logs
+*images
+.venv
+.gitignore
+.github
+.git
+.env.example
+.devcontainer
+miam-454610-a9994ca75033.json
+export_vars.sh
+kubectl*
