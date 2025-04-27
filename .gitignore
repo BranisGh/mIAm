@@ -6,6 +6,15 @@ __pycache__/
 # C extensions
 *.so
 
+# Absh files
+export_vars.sh
+
+# Kubectl
+kubectl*
+
+# GCP keys
+miam-454610-a9994ca75033.json
+
 # Distribution / packaging
 .Python
 build/

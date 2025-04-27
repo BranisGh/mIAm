@@ -1,3 +1,4 @@
+streamlit
 flake8
 black
 pytest
