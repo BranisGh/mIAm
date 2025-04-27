@@ -65,42 +65,42 @@ jobs:
           source .venv/bin/activate
           black --check ./src/
   
-  # test:
-  #   name: Run Tests
-  #   needs: lint
-  #   runs-on: ubuntu-latest
-  #   # Only run tests on push to main branches or manual triggers
-  #   if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
+  test:
+    name: Run Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    # Only run tests on push to main branches or manual triggers
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
       
-  #     - name: Set Up Python
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: ${{ env.PYTHON_VERSION }}
-  #         cache: 'pip'
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          # cache: 'pip'
       
-  #     - name: Install UV Package Manager
-  #       run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install UV Package Manager
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
       
-  #     - name: Set Up Virtual Environment and Dependencies
-  #       run: |
-  #         uv venv .venv
-  #         source .venv/bin/activate
-  #         uv pip install -e .
+      - name: Set Up Virtual Environment and Dependencies
+        run: |
+          uv venv .venv
+          source .venv/bin/activate
+          uv pip install -e .
       
-  #     - name: Run Tests with Pytest
-  #       run: |
-  #         source .venv/bin/activate
-  #         pytest tests/ --junitxml=test-results.xml
+      - name: Run Tests with Pytest
+        run: |
+          source .venv/bin/activate
+          pytest tests/ --junitxml=test-results.xml
       
-  #     - name: Upload Test Results
-  #       if: always()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: test-results
-  #         path: test-results.xml
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results.xml
   
   # build_and_push:
   #   name: Build and Push Docker Image
