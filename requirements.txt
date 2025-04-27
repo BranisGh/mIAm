@@ -1,6 +1,6 @@
 streamlit
 flake8
-black
+black[jupyter]
 pytest
 ipykernel
 python-dotenv
@@ -24,6 +24,5 @@ bcrypt
 colorama
 email-validator
 supabase
-pytest
 pytest-mock
 -e .
