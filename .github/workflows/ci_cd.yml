@@ -53,8 +53,13 @@ jobs:
           uv venv .venv
           source .venv/bin/activate
           uv pip install -e .
+        
+      - name: Format code with Black
+        run: |
+          source .venv/bin/activate
+          black ./src/
       
-      - name: Format Check with Black
+      - name: Check formatting with Black
         run: |
           source .venv/bin/activate
           black --check ./src/
