@@ -44,6 +44,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
+          cache-dependency-path: 'seteup.py'
       
       - name: Install UV Package Manager
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
