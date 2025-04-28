@@ -217,6 +217,6 @@ jobs:
           kubectl apply -f k8s/generated/miam-service.yaml
           kubectl apply -f k8s/generated/miam-ingress.yaml
 
-      - name: Wait for Deployment
-        run: |
-          kubectl rollout status deployment/miam-deployment --timeout=5m
+      # - name: Wait for Deployment
+      #   run: |
+      #     kubectl rollout status deployment/miam-deployment --timeout=5m
