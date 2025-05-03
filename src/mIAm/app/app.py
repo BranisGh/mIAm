@@ -56,6 +56,7 @@ st.set_page_config(
 APP_NAME = "mIAm"
 APP_ICON = "🍲"
 RESPONSE_STREAM_DELAY = 0.02  # seconds between words in the response stream
+FIRST_RUN = True
 
 # ===== Database Configuration =====
 def get_db_uri() -> str:
@@ -519,7 +520,9 @@ def render_error_page() -> None:
 def main() -> None:
     """Main application entry point."""
     try:
-        init_session_state()
+        if FIRST_RUN:
+            init_session_state()
+            FIRST_RUN = False
         
         if not st.session_state.api_key_set:
             st.error("OpenAI API key is not set. Please check your environment variables or secrets.")
@@ -550,3 +553,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
